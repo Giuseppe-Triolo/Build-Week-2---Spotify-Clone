@@ -59,8 +59,6 @@ button {
 }
 
 .mega-grid {
-  width: 100vw;
-  height: 100vh;
   grid-template-areas:
     "left-aside main right-aside"
     "footer footer footer";
@@ -105,11 +103,7 @@ button {
 
 @media screen and (min-width: 576px) {
   #main {
-    background: linear-gradient(
-      0deg,
-      rgba(18, 18, 18, 1) 0%,
-      rgba(34, 34, 34, 1) 100%
-    );
+    background: linear-gradient(0deg, rgba(18, 18, 18, 1) 0%, rgba(34, 34, 34, 1) 100%);
   }
 }
 
@@ -126,6 +120,7 @@ button {
   contain: content;
   gap: 8px;
   padding: 16px;
+  z-index: 1;
 }
 
 #main-header button {
@@ -139,6 +134,19 @@ button {
   width: unset !important;
 }
 
+.artistHeader {
+  width: 100%;
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
 /* * INNER HOME SECTION */
 
 @media screen and (min-width: 576px) {
