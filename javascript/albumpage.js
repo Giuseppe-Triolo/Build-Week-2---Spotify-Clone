@@ -1,130 +1,240 @@
 let audio;
-
-// Array con informazioni sugli album
+// ---------- COLORE PAGINA ----------
+// array album 
 const albumsId = [
     {
-        idAlbum: '1121182',
+        idAlbum: '119420782',
         red: 179,
         green: 179,
         blue: 179
-    }
-    
-];
+    },
+]
 
-// Array con nomi delle playlist
+
+
+
+// ---------- LOAD NAVBAR ----------
+
+// playlist array 
 const playlistNames = [
     "Playlist 1",
     "Playlist 2",
-   
+    
 ];
 
-// Funzione per popolare la colonna delle playlist
-function populatePlaylistColumn() {
+// populate playlist column
+function populatePlaylistColumn(){
+
     const playlistColumn = document.getElementById('playlistColumn');
+
     playlistNames.forEach(playlistName => {
+
         const element = document.createElement('a');
+
         element.setAttribute('href', 'javascript:void(0)');
-        element.textContent = playlistName;
+
+        element.innerHTML = playlistName;
+
         playlistColumn.appendChild(element);
-    });
+
+    })
+
 }
 
-// Funzione per popolare le tracce
-async function popolaTracce(id) {
-    const response = await album(id);
-    if (!response) return;
+// ---------- POPOLA TRACCE ----------
+async function popolaTracce(id){
 
-    const tracklist = response.tracks.data;
-    const imgArtist = (id === '1121182') ? '' : (await artist(tracklist[0].artist.id)).picture_big;
+    const tracklist = (await album(id)).tracks.data;
 
-    let durataAlbum = tracklist.reduce((acc, track) => acc + track.duration, 0);
+    const imgArtist = (id === '1121182') ? '' : (await artist(tracklist[0].artist['id'])).picture_big;
 
-    const albumContainer = document.getElementById('albumContainer');
-    const color = albumsId.find(album => album.idAlbum === id) || { red: 255, green: 255, blue: 0 };
-    albumContainer.style.background = `linear-gradient(rgb(${color.red}, ${color.green}, ${color.blue}), black 60%)`;
+    let durataAlbum = 0;
+
+    // calcolo durata album
+    for(i = 0; i < tracklist.length; i++){
+        durataAlbum += tracklist[i].duration;
+    }
+
+    let flag = 0;
+
+    // corrispondenza colore con array locale
+    for(i = 0; i < albumsId.length; i++){
+        if(albumsId[i].idAlbum === id){
+            const albumContainer = document.getElementById('albumContainer');
+            albumContainer.style.background = `linear-gradient(rgb(${albumsId[i].red}, ${albumsId[i].green}, ${albumsId[i].blue}), black 60%)`;
+            flag++;
+        }
+    }
+
+    if(flag === 0){
+        const albumContainer = document.getElementById('albumContainer');
+        albumContainer.style.background = `linear-gradient(yellow, black 60%)`;
+    }
 
     const albumBox = document.getElementById('albumBox');
-    albumBox.innerHTML = ''; // Pulisci il contenuto esistente
-    // ... (resto del codice per creare e appendere div)
+
+    const div = document.createElement('div');
+
+    div.classList.add('d-flex', 'flex-md-row', 'flex-column', 'align-items-md-end', 'align-items-center');
+
+    div.innerHTML = `<div class="me-4">
+    <img src="${(id === '364507') ? './assets/img/easter_egg_1.jpeg' : tracklist[0].album.cover_big}" width="250px" alt="">
+</div>
+<div id="infoBox">
+    <p class="m-0 d-none d-md-block" style="font-size: 0.9em">ALBUM</p>
+    <h1 class="d-none d-md-block">${tracklist[0].album.title}</h1>
+    <h2 class="d-md-none">${tracklist[0].album.title}</h2>
+    <div class="d-flex">
+        <div id="icona" class="me-2"> 
+            <img class="rounded-circle" src="${imgArtist}" width="25px" alt="">
+        </div>
+        <div>
+            <p class="m-0"><a href="./artistpage.html?id=${tracklist[0].artist.id}">${tracklist[0].artist.name}</a><i class="bi bi-dot"></i>2017<i class="bi bi-dot"></i>${tracklist.length} brani,<span class="text-secondary"> ${timeConverter(durataAlbum)}</span></p>
+        </div>
+    </div>
+</div>`;
+
+    albumBox.appendChild(div)
+
+    let c = 0;
+
+    tracklist.forEach(track => {
+
+        c++;
+        
+        const brani = document.getElementById('brani');
+
+        const row = document.createElement('div');
+
+        row.classList.add('row', 'mb-3','brano', 'py-2');
+
+        row.innerHTML = `<div class="col-6 d-flex align-items-center">
+        <div class="me-md-4">
+            <p class="d-md-block d-none">${c}</p>
+        </div>
+        <div>
+            <h6 onclick="populatePlayer(${id}, ${track.id})" style="cursor: pointer">${track.title}</h6>
+            <a href="./artistpage.html?id=${track.artist.id}"><p>${track.artist.name}</p></a>
+        </div>
+    </div>
+    <div class="col-3 d-flex align-items-center justify-content-end">
+        <p class="d-md-block d-none">${track.rank.toLocaleString()}</p>
+    </div>
+    <div class="col-3 d-flex align-items-center justify-content-end pe-4">
+        <p class="d-md-block d-none">${timeConverter(track.duration)}</p>
+    </div>`
+
+        brani.appendChild(row);
+    });
+
 }
 
-// Convertitore di tempo
-function timeConverter(sec) {
-    const minuti = Math.floor(sec / 60);
+// minuti e secondi
+function timeConverter(sec){
+
+    const minuti = Math.floor(sec/60);
+
     const secondi = sec % 60;
-    return sec > 500 ? `${minuti} minuti ${secondi} secondi` : `${minuti}:${secondi}`;
+
+    if(sec > 500){
+        return minuti + ' minuti ' + secondi + ' dadegi.';
+    }else{
+        return minuti + ':' + secondi;
+    }
+    
 }
 
-// Fetch per la ricerca
-const optionsDiscography = {
-    method: "GET",
-    headers: {
-      "X-RapidAPI-Key": "e83ad78b00mshd7c5db97ddabac3p18e6d2jsn9b1544b5b1b8",
-      "X-RapidAPI-Host": "deezerdevs-deezer.p.rapidapi.com"
-    }
-  };
-  
-  let albumsPerPage = 5;
-  let currentPage = 1;
-  let totalAlbums;
-  const displayedAlbums = new Set();
-  
-  async function getArtistDiscography(artist) {
-    try {
-      const urlDiscography = "https://deezerdevs-deezer.p.rapidapi.com/search?q=" + artist.name;
-      const response = await fetch(urlDiscography, optionsDiscography);
-      const data = await response.json();
-      const canzoni = data.data.filter((canzone) => canzone.artist.id === artist.id);
-      console.log(canzoni);
-      return canzoni;
-    } catch (asdasd) {
-      console.error(asdasd);
-    }
-  } 
 
-// Fetch per l'album
-const album1= "1121182"
-async function fetchAlbumInfo(album1) {
-    const url = `https://deezerdevs-deezer.p.rapidapi.com/album/${album1}`;
-    const options = {
-        method: 'GET',
-        headers: {
-            'X-RapidAPI-Key': 'YOUR_ACTUAL_API_KEY',
-            'X-RapidAPI-Host': 'deezerdevs-deezer.p.rapidapi.com'
-        }
-    };
+// ---------- FETCHES ----------
 
-    try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+// search fetch
+
+
+// album fetch
+
+
+// artist fetch
+
+// populate player
+async function populatePlayer(id, trackId){
+
+    const tracklist = (await album(id)).tracks.data;
+    
+    for(i = 0; i < tracklist.length; i++){
+        if(tracklist[i].id === trackId){
+
+            const currentPlay = document.getElementById('currentPlay');
+
+            currentPlay.innerHTML = '';
+
+            const div = document.createElement('div');
+
+            div.classList.add('d-flex', 'justify-content-start', 'p-2', 'gap-2');
+
+            div.innerHTML = `<div class="mx-1 bg-secondary">
+            <img src="${tracklist[i].album.cover_big}" style="max-width: 75px; max-height: 75px" alt="Album Cover"/>
+        </div>
+        <div class="pt-2">
+            <h6 class="text-truncate">${tracklist[i].title}</h6>
+            <p>${tracklist[0].artist.name}</p>
+        </div>
+        <button class="btn text-light" style="background-color: transparent">
+            <i class="bi bi-heart"></i>
+        </button>`
+
+            currentPlay.appendChild(div);
+
+            localStorage.setItem('data', JSON.stringify([id, trackId]));
+
+            audio = new Audio(tracklist[i].preview);
+            
         }
-        const result = await response.json();
-        console.log(result);
-    } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
     }
-    console.log(result);
-    return result;
+
 }
 
-fetchAlbumInfo(album1);
-// Fetch per l'artista
-async function getArtist() {
-    const url = new URL(window.location.href);
-    console.log(url);
-    const params = url.searchParams.get("id");
-    const apiUrl = "https://deezerdevs-deezer.p.rapidapi.com/artist/" + params;
-    const response = await fetch(apiUrl, options);
-    console.log(response);
-    const data = await response.json();
-    console.log(data);
-    return data;
-  }
-// Inizializzazione quando la pagina viene caricata
-window.onload = function() {
+// start mp3
+async function startMusic(){
+
+    audio.play();
+
+    const musicBtn = document.getElementById('musicBtn');
+
+    musicBtn.innerHTML = `<button class="btn text-light" onclick="pauseMusic()"
+            style="background-color: transparent">  
+                <i style="font-size: 38px" class="bi bi-pause-circle"></i>
+            </button>`;
+}
+
+// pause music
+async function pauseMusic(){
+   
+    audio.pause();
+
+    const musicBtn = document.getElementById('musicBtn');
+
+    musicBtn.innerHTML = `<button class="btn text-light" onclick="startMusic()"
+            style="background-color: transparent">  
+                <i style="font-size: 38px" class="bi bi-play-circle"></i>
+            </button>`;
+}
+
+
+window.onload = () => {
+
+    loadFriends();
+
     populatePlaylistColumn();
-    popolaTracce('1121182'); 
-};
 
+    const param = new URLSearchParams(location.search)
+    const id = param.get("id");
 
+    popolaTracce(id);
+
+    const data = JSON.parse(localStorage.getItem('data'));
+    
+    if(localStorage.getItem('data')){
+        populatePlayer(...data);
+    }
+
+}
