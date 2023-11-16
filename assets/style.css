@@ -73,6 +73,13 @@ i {
   object-fit: cover;
 }
 
+.buonaseraAlbum, .suggestionElement {
+  background-color: rgb(40, 40, 40);
+}
+.buonaseraAlbum:hover, .suggestionElement:hover {
+  background-color: #424242;
+  cursor: pointer;
+}
 
 .playBtn {
   background-color: #18D860;
@@ -146,6 +153,7 @@ i {
 .albumOver:hover {
   background-color: grey;
 }
+
 html, body {
   font-family: "Circular";
   margin: 0;
@@ -198,4 +206,5 @@ html, body {
 }
 
 #volume-control::-webkit-slider-thumb:hover {
-  box-shadow: -400px 0 0 400px #1db954;}
+  box-shadow: -400px 0 0 400px #1db954;
+}
