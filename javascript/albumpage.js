@@ -3,7 +3,7 @@ let audio;
 // array album 
 const albumsId = [
     {
-        idAlbum: '119420782',
+        idAlbum: '1121182',
         red: 179,
         green: 179,
         blue: 179
@@ -148,7 +148,35 @@ function timeConverter(sec){
 // ---------- FETCHES ----------
 
 // search fetch
+function searchDeezer(query) {
+    const apiUrl = `https://deezerdevs-deezer.p.rapidapi.com/search?q=${query}`;
 
+    fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "X-RapidAPI-Host": "deezerdevs-deezer.p.rapidapi.com",
+        "X-RapidAPI-Key": "e83ad78b00mshd7c5db97ddabac3p18e6d2jsn9b1544b5b1b8"
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("errore nella richiesta di DATA:", error);
+      });
+  }
+
+  function performSearch() {
+    const searchInput = document.getElementById("searchInput");
+    const query = searchInput.value.trim();
+
+    if (query !== "") {
+      searchDeezer(query);
+    } else {
+      alert("Please enter a search query.");
+    }
+  }
 
 // album fetch
 
