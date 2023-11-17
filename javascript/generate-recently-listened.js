@@ -3,15 +3,7 @@ window.onload = () => {
 };
 
 async function generateRecentlyListened() {
-  const options = {
-    method: "GET",
-    headers: {
-      "X-RapidAPI-Key": apiKey,
-      "X-RapidAPI-Host": "deezerdevs-deezer.p.rapidapi.com"
-    }
-  };
-
-  const targetElementsToGenerate = 8;
+  const targetElementsToGenerate = recentlyListened;
   let generatedItems = 0;
   const maxAttempts = 50;
   let attempt = 0;

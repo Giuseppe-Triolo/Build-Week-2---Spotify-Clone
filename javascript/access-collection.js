@@ -1,4 +1,3 @@
-console.log(apiKey);
 async function accessCollection(event) {
   event.preventDefault();
   const card = event.currentTarget;
@@ -15,8 +14,8 @@ async function accessCollection(event) {
 
     const output = await response.json();
 
-    const innerHomeSection = document.getElementById("main-body");
-    innerHomeSection.innerHTML = "";
+    const mainBody = document.getElementById("main-body");
+    mainBody.innerHTML = "";
 
     const dynamicBg = document.getElementById("dynamic-bg");
     dynamicBg.innerHTML = "";
@@ -26,7 +25,7 @@ async function accessCollection(event) {
       const section = document.createElement("section");
       section.id = "artist-page";
       section.className = "collection-page mb-1 mb-sm-2 mb-md-3 mb-lg-4";
-      innerHomeSection.appendChild(section);
+      mainBody.appendChild(section);
 
       const artist = document.createElement("div");
       artist.className = "d-flex gap-3";
@@ -84,7 +83,7 @@ async function accessCollection(event) {
       const section = document.createElement("section");
       section.id = "playlist-page";
       section.className = "collection-page mb-1 mb-sm-2 mb-md-3 mb-lg-4 mt-3";
-      innerHomeSection.appendChild(section);
+      mainBody.appendChild(section);
 
       const playlist = document.createElement("div");
       playlist.className = "d-flex gap-3";
@@ -105,7 +104,7 @@ async function accessCollection(event) {
         albumCover.className = "img-fluid w-100 rounded-1";
         playlistCover.appendChild(albumCover);
       } else {
-        playlistCover.style.display = "none";
+        playlistCover.classList.add("d-none");
       }
 
       const playlistInfo = document.createElement("div");
@@ -135,30 +134,27 @@ async function accessCollection(event) {
     const innerCollection = document.createElement("div");
     innerCollection.classList =
       "container d-flex flex-column p-3 h-100 w-100 z-6 mt-25";
-    innerHomeSection.appendChild(innerCollection);
+    mainBody.appendChild(innerCollection);
 
     const collectionBodyTop = document.createElement("div");
     collectionBodyTop.className = "d-flex flex-column w-100";
     innerCollection.appendChild(collectionBodyTop);
 
     const mainCollectionControls = document.createElement("div");
-    mainCollectionControls.className = "d-flex py-3 align-items-center gap-4";
+    mainCollectionControls.className = "d-flex align-items-center mt-4 gap-4";
     mainCollectionControls.innerTextFollowing;
     collectionBodyTop.appendChild(mainCollectionControls);
 
     const playPauseButton = document.createElement("button");
-    playPauseButton.id = "play-pause-button";
+    playPauseButton.id = "play-pause-button-1";
     playPauseButton.type = "button";
     playPauseButton.className = "w-48px rounded-circle";
     playPauseButton.innerHTML = `
     <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 24 24" class="w-32px currentcolor"><path d="m7.05 3.606 13.49 7.788a.7.7 0 0 1 0 1.212L7.05 20.394A.7.7 0 0 1 6 19.788V4.212a.7.7 0 0 1 1.05-.606z"></path></svg>`;
     const artistId = output.id;
-    playPauseButton.addEventListener(
-      "click",
-      playPauseButton.addEventListener("click", function () {
-        playSong(artistId);
-      })
-    );
+    playPauseButton.addEventListener("click", function () {
+      playSong(artistId);
+    });
     mainCollectionControls.appendChild(playPauseButton);
 
     const shuffleButton = document.createElement("button");
@@ -205,15 +201,6 @@ async function accessCollection(event) {
     innerCollection.appendChild(collectionBody);
 
     if (output.type === "artist") {
-      const popular = document.createElement("div");
-      popular.className = "row";
-      popular.innerHTML = `<h2 class="text-white mt-3">Popular</h2>`;
-      collectionBody.appendChild(popular);
-
-      const songCol = document.createElement("div");
-      songCol.className = "col-12";
-      collectionBody.appendChild(songCol);
-
       const artistId = output.id;
       await pullArtistTopTracks(artistId);
     } else {
@@ -238,5 +225,221 @@ async function accessCollection(event) {
     }
   } catch (error) {
     console.error("🔴 Fetching error:", error);
+  }
+}
+
+// ! ---------- ARTIST TOP TRACKS ----------
+
+async function pullArtistTopTracks(artistId) {
+  console.log(`-> Started pulling artist top tracks with id: ${artistId}`);
+  const url = `https://striveschool-api.herokuapp.com/api/deezer/artist/${artistId}/top?limit=10`;
+
+  try {
+    const output = await fetch(url, options);
+
+    if (!output.ok) {
+      throw new Error("🔴 Error");
+    }
+
+    console.log("--> Waiting for an output");
+
+    const jsonOutput = await output.json();
+    console.log("--> jsonOutput:", jsonOutput.data);
+
+    const mainBody = document.getElementById("main-body");
+
+    const innerCollection = document.createElement("div");
+    innerCollection.className =
+      "container d-flex flex-column p-3 h-100 w-100 z-6 mt-25";
+    mainBody.appendChild(innerCollection);
+
+    const collectionBody = document.createElement("div");
+    collectionBody.className = "d-flex flex-column";
+    innerCollection.appendChild(collectionBody);
+
+    const popular = document.createElement("div");
+    popular.className = "row";
+    popular.innerHTML = `<h2 class="text-white mb-3">Popular</h2>`;
+    collectionBody.appendChild(popular);
+
+    const songCol = document.createElement("div");
+    songCol.id = "tracksContainer";
+    songCol.className = "col-12";
+    collectionBody.appendChild(songCol);
+
+    async function getTopTracks() {
+      const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/artist/${artistId}/top?limit=10`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      return data;
+    }
+
+    function renderTopTracks(topTracks) {
+      if (topTracks.data) {
+        let songNumber = 1;
+        topTracks.data.forEach((track) => {
+          const card = document.createElement("div");
+          card.className = "bg-transparent text-white border-0 mx-0 py-3";
+
+          const cardBody = document.createElement("div");
+          cardBody.className = "";
+          const row = document.createElement("div");
+          row.className = "row";
+
+          const rowMain = document.createElement("div");
+          rowMain.className = "d-flex align-items-center gap-4";
+
+          const songNum = document.createElement("span");
+          songNum.className = "grey-font fs-09";
+          songNum.innerText = songNumber;
+          rowMain.appendChild(songNum);
+
+          const imgColumn = document.createElement("span");
+          imgColumn.className = "grey-font fs-09";
+
+          if (track.album.cover_small) {
+            const img = document.createElement("img");
+            img.src = track.album.cover_small;
+            img.alt = track.title;
+            img.className = "img-fluid w-40px";
+            imgColumn.appendChild(img);
+          }
+
+          const textColumn = document.createElement("span");
+          textColumn.className = "";
+
+          const title = document.createElement("span");
+          title.className = "text-white fs-5";
+          title.textContent = track.title;
+
+          songCol.appendChild(card);
+          card.appendChild(cardBody);
+          cardBody.appendChild(row);
+          row.appendChild(rowMain);
+          rowMain.appendChild(imgColumn);
+          rowMain.appendChild(textColumn);
+          textColumn.appendChild(title);
+          console.log(`-> item ${songNumber} generated`);
+          songNumber++;
+        });
+      } else {
+        console.error("Nessuna traccia trovata nell'album.");
+      }
+    }
+    const topTracks = await getTopTracks();
+    renderTopTracks(topTracks);
+    pullArtistAlbums(artistId);
+  } catch (error) {
+    console.error("🔴 Error fetching top tracks:", error);
+  }
+}
+
+// ! ---------- DISCOGRAFIA ----------
+
+async function pullArtistAlbums(artistId) {
+  console.log(`-> Started pulling artist top tracks with id: ${artistId}`);
+
+  let albumsPerPage = 5;
+  let currentPage = 1;
+  let totalAlbums;
+  const displayedAlbums = new Set();
+
+  async function getArtistDiscography(artist) {
+    try {
+      const urlDiscography =
+        "https://deezerdevs-deezer.p.rapidapi.com/search?q=" + artist.name;
+      const response = await fetch(urlDiscography, options);
+      const data = await response.json();
+      const canzoni = data.data.filter(
+        (canzone) => canzone.artist.id === artist.id
+      );
+      console.log(canzoni);
+      return canzoni;
+    } catch (asdasd) {
+      console.error(asdasd);
+    }
+  }
+
+  function showMore(canzoni) {
+    albumsPerPage = 1000;
+    currentPage++;
+    mostraAlbum(canzoni);
+    const showMoreButton = document.getElementById("show-more-button");
+    showMoreButton.style.display = "none";
+  }
+
+  function addToSet(name, album) {
+    const nameAlreadyExists = Array.from(displayedAlbums).some(
+      (item) => item.album.title === name
+    );
+    if (!nameAlreadyExists) {
+      displayedAlbums.add(album);
+    }
+  }
+
+  function mostraAlbum(canzoni) {
+    const start = currentPage === 1 ? 0 : 5;
+    const end = start + albumsPerPage;
+
+    canzoni.forEach((x) => {
+      addToSet(x.album.title, x);
+    });
+
+    console.log(displayedAlbums);
+    Array.from(displayedAlbums)
+      .slice(start, end)
+      .forEach((result) => {
+        const album = result.album;
+        const col = document.createElement("div");
+        col.className = "col-md-2 mb-4";
+        const card = document.createElement("div");
+        card.className = "card album-card bg-transparent text-white border-0";
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body";
+        const img = document.createElement("img");
+        img.src = album.cover_medium;
+        img.alt = album.title;
+        img.className = "img-fluid";
+        const title = document.createElement("h6");
+        title.className = "card-title mt-2";
+        title.textContent = album.title;
+        cardBody.appendChild(img);
+        cardBody.appendChild(title);
+        card.appendChild(cardBody);
+        col.appendChild(card);
+        const songCol = document.getElementById("tracksContainer");
+        songCol.appendChild(col);
+      });
+    if (end >= totalAlbums) {
+      const showMoreButton = document.getElementById("show-more-button");
+      showMoreButton.classList.add("d-none");
+    }
+  }
+
+  // * CHIAMATE DISCOGRAFIA
+
+  const artist = await getArtist();
+  getArtistDiscography(artist);
+  const canzoni = await getArtistDiscography(artist);
+  mostraAlbum(canzoni);
+  const showMoreButton = document.createElement("button");
+  showMoreButton.id = "show-more-button";
+  showMoreButton.type = "button";
+  showMoreButton.className = "btn border-0 bg-transparent fs-09 grey-font";
+  showMoreButton.innerText = "Show more";
+  showMoreButton.addEventListener("click", () => {
+    showMore(canzoni);
+  });
+  const songCol = document.getElementById("tracksContainer");
+  songCol.appendChild(showMoreButton);
+
+  async function getArtist() {
+    const apiUrl =
+      "https://deezerdevs-deezer.p.rapidapi.com/artist/" + artistId;
+    const response = await fetch(apiUrl, options);
+    console.log(response);
+    const data = await response.json();
+    console.log(data);
+    return data;
   }
 }

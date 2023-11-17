@@ -442,8 +442,8 @@ header {
 
 /* OPEN COLLECTION PLAYER  */
 
-#play-pause-button {
-  background-color: #1ed760;
+#play-pause-button-1 {
+  background-color: #1ed760 !important;
 }
 
 /* ! ---------- FOOTER ---------- */

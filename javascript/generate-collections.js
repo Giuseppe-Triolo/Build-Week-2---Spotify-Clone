@@ -1,17 +1,9 @@
-const options = {
-  method: "GET",
-  headers: {
-    "X-RapidAPI-Key": apiKey,
-    "X-RapidAPI-Host": "deezerdevs-deezer.p.rapidapi.com"
-  }
-};
-
 async function generateCollections() {
-  const targetElementsToGenerate = 10; // Elementi da generare
-  let generatedItems = 0; // Elementi generati
+  const targetElementsToGenerate = asideCollections;
+  let generatedItems = 0;
 
-  const maxAttempts = 50; // Tentativi da effettuare in caso di errore
-  let attempt = 0; // Tentativi effettuati
+  const maxAttempts = 50;
+  let attempt = 0;
 
   let collection = "";
 
@@ -21,11 +13,10 @@ async function generateCollections() {
       let collectionUrl;
       let collectionMaxItems;
 
-      // genera un artista o una playlist in base ai valori compresi fra 0 e 1
       if (randomCollection > 0) {
         collection = "artist";
         collectionUrl = "https://deezerdevs-deezer.p.rapidapi.com/artist/";
-        collectionMaxItems = 1711306; // Artisti totali registrati nell'API di Deezer
+        collectionMaxItems = 100; // Artisti totali registrati nell'API di Deezer
       } else {
         collection = "playlist";
         collectionUrl = "https://deezerdevs-deezer.p.rapidapi.com/playlist/";
