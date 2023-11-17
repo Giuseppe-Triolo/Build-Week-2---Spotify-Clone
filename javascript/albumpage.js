@@ -191,17 +191,8 @@ function timeConverter(sec) {
 // ---------- FETCHES ----------
 
 // search fetch
-const url = "https://deezerdevs-deezer.p.rapidapi.com/album/1121182";
-const options = {
-  method: "GET",
-  headers: {
-    "X-RapidAPI-Key": "e83ad78b00mshd7c5db97ddabac3p18e6d2jsn9b1544b5b1b8",
-    "X-RapidAPI-Host": "deezerdevs-deezer.p.rapidapi.com"
-  }
-};
 
-const urlArtist = "https://deezerdevs-deezer.p.rapidapi.com/artist/queen";
-const optionsArtist = {
+const options = {
   method: "GET",
   headers: {
     "X-RapidAPI-Key": "e83ad78b00mshd7c5db97ddabac3p18e6d2jsn9b1544b5b1b8",
@@ -211,8 +202,28 @@ const optionsArtist = {
 
 async function getAlbumDetails() {
   try {
-    const response = await fetch(url, options);
+    const url = new URL(window.location.href);
+    console.log(url);
+    const params = url.searchParams.get("id");
+    const apiUrl = "https://deezerdevs-deezer.p.rapidapi.com/album/" + params;
+    const response = await fetch(apiUrl, options);
+    console.log(response);
     const data = await response.json();
+    console.log(data);
+
+    try {
+      const artistHeader = document.querySelector(".artistHeader");
+      if (data.cover_xl) {
+        artistHeader.style.backgroundImage = `url('${data.cover_xl}')`;
+        artistHeader.style.backgroundSize = "cover";
+        artistHeader.style.backgroundPosition = "center";
+      } else {
+        console.error("Errore nel recupero dei dati dell'album.");
+      }
+    } catch (error) {
+      console.error("Errore nella richiesta API:", error);
+    }
+
     if (data.tracks.data) {
       const tracksContainer = document.getElementById("tracksContainer");
 
@@ -255,26 +266,6 @@ async function getAlbumDetails() {
 }
 
 getAlbumDetails();
-// artist fetch
-/* const options = {
-    method: "GET",
-    headers: {
-      "X-RapidAPI-Key": "e83ad78b00mshd7c5db97ddabac3p18e6d2jsn9b1544b5b1b8",
-      "X-RapidAPI-Host": "deezerdevs-deezer.p.rapidapi.com"
-    }
-  };
-  
-  async function getArtist() {
-    const url = new URL(window.location.href);
-    console.log(url);
-    const params = url.searchParams.get("id");
-    const apiUrl = "https://deezerdevs-deezer.p.rapidapi.com/artist/" + params;
-    const response = await fetch(apiUrl, options);
-    console.log(response);
-    const data = await response.json();
-    console.log(data);
-    return data;
-  } */
 
 // populate player
 async function populatePlayer(id, trackId) {
